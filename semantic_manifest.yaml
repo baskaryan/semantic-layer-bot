@@ -1,0 +1,111 @@
+semantic_models:
+  - name: trips
+    description: Citibike trip fact table. This table is at the trip grain with one row per trip.
+    defaults:
+      agg_time_dimension: start_time
+    model: ref('fct_trips')
+    entities:
+      - name: trip_id
+        type: primary
+    dimensions:
+      - name: start_time
+        type: time
+        description: Timestamp (UTC) that the trip started.
+        type_params:
+          time_granularity: day
+      - name: start_station_name
+        description: Plaintext name of the station that the trip was started from.
+        type: categorical
+      - name: end_station_name
+        description: Plaintext name of the station that the trip was ended at.
+        type: categorical
+    measures:
+      - name: trip_count
+        description: Total number of completed citibike trips.
+        expr: trip_id
+        agg: count
+
+  - name: order_item
+    defaults:
+      agg_time_dimension: ordered_at
+    description: Items contained in each order. The grain of the tale is one row per ordered item.
+    model: ref('order_items')
+    entities:
+      - name: order_item
+        type: primary
+        expr: order_item_id
+      - name: order_id
+        type: foreign
+        expr: order_id
+      - name: product
+        type: foreign
+        expr: product_id
+    dimensions:
+      - name: ordered_at
+        expr: cast(ordered_at as DATETIME)
+        type: time
+        type_params:
+          time_granularity: day
+      - name: is_food_item
+        type: categorical
+      - name: is_drink_item
+        type: categorical
+    measures:
+      - name: revenue
+        description: The revenue generated for each order item. Revenue is calculated as the sum of the product price across all ordered items.
+        agg: sum
+        expr: product_price
+      - name: food_revenue
+        description: The revenue generated for each order item. Revenue is calculated as the sum of the product price across all ordered items for which is_food_item = 1.
+        agg: sum
+        expr: case when is_food_item = 1 then product_price else 0 end
+      - name: drink_revenue
+        description: The revenue generated for each order item. Revenue is calculated as the sum of the product price across all ordered items for which is_drink_item = 1.
+        agg: sum
+        expr: case when is_drink_item = 1 then product_price else 0 end
+      - name: median_revenue
+        description: The median revenue generated for each order item. Excludes tax.
+        agg: median
+        expr: product_price
+
+metrics:
+  - name: trip_count
+    label: Trip Count
+    description: Total number of completed citibike trips.
+    type: simple
+    type_params:
+      measure: trip_count
+  - name: trip_count_growth_wow
+    label: Trip Count Grow - WoW
+    description: Percentage grow in trips completed compared to same day last week.
+    type: derived
+    type_params:
+      expr: (trip_count - trip_count_last_week)*100/trip_count_last_week
+      metrics:
+        - name: trip_count
+        - name: trip_count
+          offset_window: 1 week
+          alias: trip_count_last_week
+
+  - name: revenue
+    description: Sum of the product revenue for each order item.
+    type: simple
+    label: Revenue
+    type_params:
+      measure:
+        name: revenue
+        fill_nulls_with: 0
+  - name: order_cost
+    description: Sum of cost fo each order item.
+    label: Order Cost
+    type: simple
+    type_params:
+      measure: order_cost
+  - name: median_revenue
+    description: The median revenue for each order item. Excludes tax.
+    type: simple
+    label: Median Revenue
+    type_params:
+      measure: median_revenue
+
+

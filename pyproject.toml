@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "langgraph-semantic-layer-example"
+version = "0.1.0"
+description = ""
+authors = []
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.13"
+pyyaml = "^6.0.1"
+langgraph = "^0.1.2"
+langchain-anthropic = "^0.1.16"
+langchain-openai = "^0.1.10"
+langchain-community = "^0.2.6"
+langchain-chroma = "^0.1.1"
+
+
+[tool.poetry.group.dev.dependencies]
+jupyter = "^1.0.0"
+notebook = "^7.2.1"
+grandalf = "^0.8"
+
+
+[tool.poetry.group.lint.dependencies]
+ruff = "^0.5.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
