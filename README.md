@@ -30,5 +30,10 @@ async for event in graph.astream_events({"messages": [("human", "how much was or
     - Use a real vecstore (not a local one)
     - Use a real record manager (not an in mem one)
     - Do less naive retrieval (hybrid semantc + keyword search, include parent information in each chunk, etc)
-- Improve prompts
+- Improve prompts, add few-shot examples
 - Make sure dbt api calls are correct 
+
+
+## LangGraph docs
+
+https://langchain-ai.github.io/langgraph/
